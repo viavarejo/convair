@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../ConvairHub/.idea/.idea.iml" filepath="$PROJECT_DIR$/../ConvairHub/.idea/.idea.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/Convair.iml" filepath="$PROJECT_DIR$/.idea/Convair.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../ConvairHub/ConvairHub.iml" filepath="$PROJECT_DIR$/../ConvairHub/ConvairHub.iml" />
     </modules>
   </component>
 </project>

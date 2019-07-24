@@ -38,11 +38,9 @@ Create a Jenkinsfile in the root of your repository, and consume all the availab
 @Library("convair") _
 @Library("convair-hub")
 
-import br.com.viavarejo.jornada.jenkins.stages.common.*
-import br.com.viavarejo.jornada.jenkins.stages.maven.*
-import br.com.viavarejo.jornada.jenkins.stages.sonarqube.*
-import br.com.viavarejo.jornada.jenkins.stages.openshift.*
-import br.com.viavarejo.jornada.jenkins.stages.git.*
+
+import br.com.viavarejo.jenkins.stages.maven.*
+import br.com.viavarejo.jenkins.stages.git.*
 
 Convair {
   
@@ -55,15 +53,13 @@ Convair {
   selectedAgent = "jenkinsMavenSlave"
   
   selectedStages = [
-    DefineType: DefineType.use(),
-  
-    MavenSetVersion: MavenSetVersion.use(),
+    
+    MavenSetVersion: MavenSetVersion.use(new MavenSetVersionParameters(
+        maven: 'M3', 
+        mavenSettingsConfig: 'mavenSettings'
+    )),
   
     MavenUnitTest: MavenUnitTest.use(),
-
-    MavenSonar: MavenSonar.use([maven: 'm2', mavenSettingsConfig: 'ronaldo']),
-
-    QualityGate: QualityGate.use([:]),
 
     MySpecificStage: [
       shouldRun: { true },
@@ -77,23 +73,16 @@ Convair {
       shouldRun: { env.HELLO == 'WORLD' },
       run: {
         println "Hello ${env.HELLO}"
-        env.MAVEN_BUILD = true
+        env.MAVEN_SONAR = true
       }
     ],
 
-    MavenBuid: MavenBuild.use(),
 
-    GitVersion: GitVersion.use(),
+    MavenSonar: MavenSonar.use(new MavenSonarParameters(
+        maven: 'M3',
+        mavenSettingsConfig: 'mavenSettings'
+    ), { env.MAVEN_SONAR }),
 
-    MavenDeploy: MavenDeploy.use(),
-
-    CreateImageBuilder: OCJavaCreateImageBuilder.use(),
-
-    StartBuild: OCStartBuildFromDir.use(),
-
-    PushImage: OCPushImage.use(),
-
-    DeployOC: OCUpdateDeploymentImage.use()
   
   ]
 }
