@@ -41,7 +41,8 @@ def call(Closure body){
                         selectedStages.each { myStage ->
                             myStage.value.shouldRun.delegate = scriptClosure
                             myStage.value.run.delegate = scriptClosure
-
+                            myStage.value.shouldRun.resolveStrategy = Closure.DELEGATE_FIRST
+                            myStage.value.run.resolveStrategy = Closure.DELEGATE_FIRST
                             stage(myStage.key){
                                 if(myStage.value.shouldRun()){
                                     myStage.value.run()
