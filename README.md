@@ -85,6 +85,18 @@ Convair {
 
   
   ]
+  
+  onFailure = {
+    // Do something in case the pipeline breaks
+  }
+  
+  onSuccess = {
+    // Do something in case the pipeline works
+  }
+  
+  always = {
+    // Do something, always, regardless of error or success
+  }
 }
 ```
 
