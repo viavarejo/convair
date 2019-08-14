@@ -17,45 +17,64 @@ def call(Closure body){
     }
     Map<String, ConvairStage> selectedStages = parameters.selectedStages
 
-    pipeline {
-        agent {
-            node {
-                label parameters.selectedAgent
+    node(parameters.selectedAgent) {
+        stage("Initialize"){
+            println parameters
+            sh "env"
+        }
+        def scmVars
+        stage("Checkout SCM"){
+            scmVars = checkout scm
+        }
+        def scriptClosure = owner
+        try {
+
+            selectedStages.each { myStage ->
+                myStage.value.shouldRun.delegate = scriptClosure
+                myStage.value.run.delegate = scriptClosure
+                myStage.value.shouldRun.resolveStrategy = Closure.DELEGATE_FIRST
+                myStage.value.run.resolveStrategy = Closure.DELEGATE_FIRST
+
+                if(myStage.value.shouldRun()){
+                    stage(myStage.key){
+                        myStage.value.run()
+                    }
+                } else {
+                    println "Stage ${myStage.key} skipped"
+                }
+            }
+            currentBuild.result = 'SUCCESS'
+        } catch (Exception e){
+            e.printStackTrace()
+            currentBuild.result = 'FAILURE'
+        }
+
+        if(currentBuild.result == "FAILURE"){
+            if(parameters.onFailure && parameters.onFailure instanceof Closure){
+                stage("On Failure"){
+                    parameters.onFailure.delegate = scriptClosure
+                    parameters.onFailure.resolveStrategy = Closure.DELEGATE_FIRST
+                    parameters.onFailure()
+                }
             }
         }
-        stages {
-            stage("Initialize"){
-                steps{
-                    script {
-                        println parameters
-                        sh "env"
-                    }
+
+        if(currentBuild.result == "SUCCESS"){
+            if(parameters.onSuccess && parameters.onSuccess instanceof Closure){
+                stage("On Success"){
+                    parameters.onSuccess.delegate = scriptClosure
+                    parameters.onSuccess.resolveStrategy = Closure.DELEGATE_FIRST
+                    parameters.onSuccess()
                 }
             }
+        }
 
-            stage("Dynamic Stages"){
-
-                steps{
-                    script {
-                        def scriptClosure = owner
-                        selectedStages.each { myStage ->
-                            myStage.value.shouldRun.delegate = scriptClosure
-                            myStage.value.run.delegate = scriptClosure
-                            myStage.value.shouldRun.resolveStrategy = Closure.DELEGATE_FIRST
-                            myStage.value.run.resolveStrategy = Closure.DELEGATE_FIRST
-                            stage(myStage.key){
-                                if(myStage.value.shouldRun()){
-                                    myStage.value.run()
-                                } else {
-                                    println "Stage ${myStage.key} skipped"
-                                }
-                            }
-                        }
-                    }
-                }
+        if(parameters.always && parameters.always instanceof Closure){
+            stage("Always"){
+                parameters.always.delegate = scriptClosure
+                parameters.always.resolveStrategy = Closure.DELEGATE_FIRST
+                parameters.always()
             }
-
         }
     }
-
 }
