@@ -28,6 +28,7 @@ def call(Closure body){
             scmVars.each {
                 env[it.key] = it.value
             }
+            println scmVars
         }
         def scriptClosure = owner
         try {
