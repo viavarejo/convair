@@ -25,6 +25,10 @@ def call(Closure body){
         def scmVars
         stage("Checkout SCM"){
             scmVars = checkout scm
+            scmVars.each {
+                env[it.key] = it.value
+            }
+            println scmVars
         }
         def scriptClosure = owner
         try {
