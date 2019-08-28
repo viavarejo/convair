@@ -8,13 +8,14 @@ def call(Closure body){
     def parameters = [:]
     body.resolveStrategy = Closure.DELEGATE_FIRST
     body.delegate = parameters
-
+    parameters.env = env
     body()
 
     Map variables = parameters.variables ?: [:]
     variables.each {
         env[it.key] = it.value
     }
+
     Map<String, ConvairStage> selectedStages = parameters.selectedStages
 
     node(parameters.selectedAgent) {
