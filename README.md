@@ -100,5 +100,35 @@ Convair {
 }
 ```
 
+## Usage with Docker Pipeline
+
+If you want to use Docker Agents, use the following syntax:
+
+```groovy
+#!/usr/bin/env groovy
+Convair {
+    selectedAgent = {
+        image = "node:7-alpine"
+    }
+
+    selectedStages = [
+            Test: [
+                    shouldRun: { true },
+                    run: {
+                        sh "node -v"
+                        sh "ls -l"
+                    }
+            ],
+            Test2: [
+                    shouldRun: { true },
+                    run: {
+                        sh "node -v"
+                        sh "ls -l"
+                    },
+                    image: 'node:8-alpine'
+            ]
+    ]
+}
+```
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
