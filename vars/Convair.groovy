@@ -7,10 +7,9 @@ interface ConvairStage {
 
 
 def call(Closure body) {
-    def parameters = [env: env]
+    def parameters = [:]
     body.resolveStrategy = Closure.DELEGATE_FIRST
     body.delegate = parameters
-    parameters.env = env
     body()
 
     Map variables = parameters.variables ?: [:]
@@ -31,11 +30,10 @@ def call(Closure body) {
 
     }
     node(nodeLabel) {
-
-
         stage("Initialize") {
             println parameters
-            sh "env"
+            println "=== ENV Object ==="
+            println env
         }
         def scmVars
         stage("Checkout SCM") {
