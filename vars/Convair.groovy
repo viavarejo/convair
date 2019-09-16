@@ -2,19 +2,20 @@ interface ConvairStage {
     Closure shouldRun
     Closure run
     String image
+    String imageArgs
 }
 
 
 def call(Closure body) {
-    def parameters = [env: env]
+    def parameters = [:]
     body.resolveStrategy = Closure.DELEGATE_FIRST
     body.delegate = parameters
+    body()
+
     Map variables = parameters.variables ?: [:]
     variables.each {
         env[it.key] = it.value
     }
-    body()
-
 
     Map<String, ConvairStage> selectedStages = parameters.selectedStages
 
@@ -29,11 +30,10 @@ def call(Closure body) {
 
     }
     node(nodeLabel) {
-
-
         stage("Initialize") {
             println parameters
-            sh "env"
+            println "=== ENV Object ==="
+            println env
         }
         def scmVars
         stage("Checkout SCM") {
@@ -54,8 +54,9 @@ def call(Closure body) {
 
                 if (myStage.value.shouldRun()) {
                     def dockerImage = myStage.value.image ?: nodeParameters.image
+                    def dockerImageArgs = myStage.value.imageArgs ?: nodeParameters.imageArgs
                     if (dockerImage) {
-                        docker.image(dockerImage).inside {
+                        docker.image(dockerImage).inside(dockerImageArgs) {
                             stage(myStage.key) {
                                 myStage.value.run()
                             }
