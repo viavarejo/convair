@@ -43,15 +43,19 @@ def call(Closure body) {
             println env
         }
         def scmVars
-        stage("Checkout SCM") {
-            if (env.GIT_LONGPATHS) {
-                command "git config --global core.longpaths true"
+        if(env.NO_CHECKOUT){
+            println "NO_CHECKOUT is true. Skipping checkout"
+        } else {
+            stage("Checkout SCM") {
+                if (env.GIT_LONGPATHS) {
+                    command "git config --global core.longpaths true"
+                }
+                scmVars = checkout scm
+                scmVars.each {
+                    env[it.key] = it.value
+                }
+                println scmVars
             }
-            scmVars = checkout scm
-            scmVars.each {
-                env[it.key] = it.value
-            }
-            println scmVars
         }
         def scriptClosure = owner
         try {
