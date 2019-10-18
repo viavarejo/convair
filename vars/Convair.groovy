@@ -55,7 +55,7 @@ def call(Closure body) {
         }
         if (env.GIT_CHECK_MASTER) {
             stage("Check master ancestry") {
-                command "git merge-base --is-ancestor origin/master HEAD"
+                command 'git merge-base --is-ancestor origin/master HEAD || if [ $? -gt 0 ]; then echo "[ERROR] Branch is behind master" && exit 1; fi'
             }
         }
         def scriptClosure = owner
