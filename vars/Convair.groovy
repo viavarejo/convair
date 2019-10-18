@@ -53,6 +53,11 @@ def call(Closure body) {
             }
             println scmVars
         }
+        if (env.GIT_CHECK_MASTER) {
+            stage("Check master ancestry") {
+                command "git merge-base --is-ancestor origin/master HEAD"
+            }
+        }
         def scriptClosure = owner
         try {
 
