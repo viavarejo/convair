@@ -21,7 +21,7 @@ def call(Closure body) {
 
     def nodeLabel = parameters.selectedAgent instanceof String ? parameters.selectedAgent : null
     def nodeParameters = [:]
-    if(parameters.selectedAgent instanceof Closure){
+    if (parameters.selectedAgent instanceof Closure) {
         parameters.selectedAgent.delegate = nodeParameters
         parameters.selectedAgent.resolveStrategy = Closure.DELEGATE_FIRST
         parameters.selectedAgent()
@@ -29,19 +29,34 @@ def call(Closure body) {
 
 
     }
+
+    def command = { command ->
+        if (isUnix()) {
+            sh command
+        } else {
+            bat command
+        }
+    }
+  
     node(nodeLabel) {
         stage("Initialize") {
             println parameters
-            println "=== ENV Object ==="
-            println env
         }
         def scmVars
         stage("Checkout SCM") {
+            if (env.GIT_LONGPATHS) {
+                command "git config --global core.longpaths true"
+            }
             scmVars = checkout scm
             scmVars.each {
                 env[it.key] = it.value
             }
             println scmVars
+        }
+        if (env.GIT_CHECK_MASTER) {
+            stage("Check master ancestry") {
+                command 'git merge-base --is-ancestor origin/master HEAD || if [ $? -gt 0 ]; then echo "[ERROR] Branch is behind master" && exit 1; fi'
+            }
         }
         def scriptClosure = owner
         try {
