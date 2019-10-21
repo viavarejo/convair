@@ -37,10 +37,10 @@ def call(Closure body) {
             bat command
         }
     }
+  
     node(nodeLabel) {
         stage("Initialize") {
             println parameters
-            println env
         }
         def scmVars
         stage("Checkout SCM") {
