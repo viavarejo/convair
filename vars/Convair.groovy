@@ -43,19 +43,23 @@ def call(Closure body) {
             println parameters
         }
         def scmVars
-        stage("Checkout SCM") {
-            if (env.GIT_LONGPATHS) {
-                command "git config --global core.longpaths true"
+        if(env.NO_CHECKOUT){
+            println "NO_CHECKOUT is true. Skipping checkout"
+        } else {
+            stage("Checkout SCM") {
+                if (env.GIT_LONGPATHS) {
+                    command "git config --global core.longpaths true"
+                }
+                scmVars = checkout scm
+                scmVars.each {
+                    env[it.key] = it.value
+                }
+                println scmVars
             }
-            scmVars = checkout scm
-            scmVars.each {
-                env[it.key] = it.value
-            }
-            println scmVars
-        }
-        if (env.GIT_CHECK_MASTER) {
-            stage("Check master ancestry") {
-                command 'git merge-base --is-ancestor origin/master HEAD || if [ $? -gt 0 ]; then echo "[ERROR] Branch is behind master" && exit 1; fi'
+            if (!env.GIT_SKIP_CHECK_MASTER) {
+                stage("Check master ancestry") {
+                    command 'git merge-base --is-ancestor origin/master HEAD || if [ $? -gt 0 ]; then echo "[ERROR] Branch is behind master" && exit 1; fi'
+                }
             }
         }
         def scriptClosure = owner
