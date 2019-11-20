@@ -10,7 +10,7 @@ def call(Closure body) {
     def parameters = [:]
     body.resolveStrategy = Closure.DELEGATE_FIRST
     body.delegate = parameters
-    body()
+    body.call()
 
     Map variables = parameters.variables ?: [:]
     variables.each {
@@ -24,7 +24,7 @@ def call(Closure body) {
     if (parameters.selectedAgent instanceof Closure) {
         parameters.selectedAgent.delegate = nodeParameters
         parameters.selectedAgent.resolveStrategy = Closure.DELEGATE_FIRST
-        parameters.selectedAgent()
+        parameters.selectedAgent.call()
         nodeLabel = nodeParameters.label ?: nodeLabel
 
 
@@ -71,18 +71,18 @@ def call(Closure body) {
                 myStage.value.shouldRun.resolveStrategy = Closure.DELEGATE_FIRST
                 myStage.value.run.resolveStrategy = Closure.DELEGATE_FIRST
 
-                if (myStage.value.shouldRun()) {
+                if (myStage.value.shouldRun.call()) {
                     def dockerImage = myStage.value.image ?: nodeParameters.image
                     def dockerImageArgs = myStage.value.imageArgs ?: nodeParameters.imageArgs
                     if (dockerImage) {
                         docker.image(dockerImage).inside(dockerImageArgs) {
                             stage(myStage.key) {
-                                myStage.value.run()
+                                myStage.value.run.call()
                             }
                         }
                     } else {
                         stage(myStage.key) {
-                            myStage.value.run()
+                            myStage.value.run.call()
                         }
                     }
                 } else {
@@ -100,7 +100,7 @@ def call(Closure body) {
                 stage("On Failure") {
                     parameters.onFailure.delegate = scriptClosure
                     parameters.onFailure.resolveStrategy = Closure.DELEGATE_FIRST
-                    parameters.onFailure()
+                    parameters.onFailure.call()
                 }
             }
         }
@@ -110,7 +110,7 @@ def call(Closure body) {
                 stage("On Success") {
                     parameters.onSuccess.delegate = scriptClosure
                     parameters.onSuccess.resolveStrategy = Closure.DELEGATE_FIRST
-                    parameters.onSuccess()
+                    parameters.onSuccess.call()
                 }
             }
         }
@@ -119,7 +119,7 @@ def call(Closure body) {
             stage("Always") {
                 parameters.always.delegate = scriptClosure
                 parameters.always.resolveStrategy = Closure.DELEGATE_FIRST
-                parameters.always()
+                parameters.always.call()
             }
         }
     }
